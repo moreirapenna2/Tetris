@@ -1,0 +1,47 @@
+DOCUMENTAÇÃO PROJETO TETRIS
+
+
+
+Main:
+As variáveis declaradas no começo do "Main" são as principais usadas no texto de entrada.
+O texto de entrada é aberto como "arq" e passado para as funções, para não precisar reabrir o arquivo e ler desde o começo.
+Atrubui o espaço na memória alocado por "AlocaAtual" à variável "pecaatual".
+Há um laço for que funciona da seguinte maneira:
+    Ocorrerá de acordo com a quantidade de peças no jogo, lido no "leArquivo"
+    O "lePecas" lerá os dados de uma peça, a quantidade de movimentos será alocada no vetmov que terá todos movimentos da peça atual
+    lidos no "leMovimentos".
+    Depois, o jogo rodará com a peça atual, e quando acabar vai voltar, ler outra peça, ler os movimentos da peça, jogar, e assim por
+    diante, até acabarem as peças do jogo.
+
+AlocaAtual:
+Para guardar o estilo da peça atual foi alocado um espaço na memória de tamanho 3x3 que é o tamanho máximo das peças, e do tipo char
+pois as peças são interpretadas por "*", "." e "#".
+
+
+LiberaAtual:
+Libera a memória alocada para guardar os valores da peca atual, alocada em "AlocaAtual".
+
+
+leArquivo:
+A função "leArquivo" recebe todos valores por referência, para que estes estejam disponíveis na "Main" e poderem passar para outras
+funções; abre a entrada como "arq"e passa a atribuir os valores da entrada para as variáveis. São lidos apenas os valores básicos do
+jogo, como o tamanho da tela, o intervalo de tempo entre as peças, e a quantidade de peças que descerão.
+
+lePecas:
+A função "lePecas" lê da entrada os dados da peça atual, como o estilo, a coluna em que vai descer e a quantidade de movimentos.
+O cache é usado para resolver problemas na hora de ler o estilo da peça
+
+leMovimentos:
+A função "leMovimentos" lê da entrada os movimentos que a peça fará e guarda no vetor de char "vetmov", o cache é usado para resolver
+problemas de leitura de char.
+
+
+
+
+Ideia:
+ler os dados principais do jogo no "leArquivo", usar um laço for no main para ler uma peça na função "lePecas" e depois executar a peca
+no jogo, repetir isso pelo número de peças, quando acabar, ver se a próxima leitura é <eof>, se for, terminar, se não, rodar o main
+novamente pois é outro jogo.
+Para cada movimento do usuário, haverá um movimento do jogo puxando a peça para baixo.
+limpar tela: system("clear")
+esperar tempo: sleep(tempo)
