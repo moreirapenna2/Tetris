@@ -89,8 +89,8 @@ void leArquivo(FILE *arq, int *linhas, int *colunas, int *tempo, int *quantpecas
 
 
 
-void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentospecaatual, int *tampeca){
-    int i,j,tampeca2=0;
+void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentospecaatual, int *tamanhopeca){
+    int i,j, tam;
     char cache;
     //FILE *arq;
     //arq = fopen("entrada.txt", "r");
@@ -101,15 +101,15 @@ void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentos
         fscanf(arq, "%c", &cache);
         for(j=0; j<3; j++){
             fscanf(arq, "%c", &pecaatual[j][i]);
-            if(pecaatual[i][j] == 42)
-                tampeca2=i;
+            if(pecaatual[i][j] != 46)
+                tam=i; printf("entrou aqui com i=%d\n", i);
             printf("char [%d][%d] da peca pec: %c\n",i,j,pecaatual[j][i]);
         }
     }
-    printf("tamanho da peca2: %d\n", tampeca2);
-    *tampeca=tampeca2;
-    printf("tamanho da peca: %d\n", *tampeca);
-
+    // printf("tamanho da peca2: %d\n", tampeca2);
+    // *tampeca=tampeca2;
+    // printf("tamanho da peca: %d\n", *tampeca);
+    *tamanhopeca = tam; printf("OLHA AQUI: tam=%d, tamannhopeca=%d\n", tam, *tamanhopeca);
     fscanf(arq, "%d", movimentospecaatual);
     printf("colunas primeira peca pec: %d\n", *colunapecaatual);
     printf("peca atual pec:\n");
@@ -190,14 +190,15 @@ void printarTela(char **tela, int linhas, int colunas){
         }
         printf("\n");
     }
+    printf("\n\n");
 }
 
 
 
 
-void descerUm(char **tela, int linhas, int colunas){
+void descerUm(char **tela, int linhas, int colunas, int linhapecaatual,int colunapecaatual, int tamanhopeca){
     int i,j;
-    char tela2[linhas][colunas];
+    /*char tela2[linhas][colunas];
     //zera a segunda tela
     for(i=0; i<linhas; i++){
         for(j=0; j<colunas; j++){
@@ -216,6 +217,31 @@ void descerUm(char **tela, int linhas, int colunas){
         for(j=0; j<colunas; j++){
             tela[i][j] = tela2[i][j];
         }
+    }*/
+    char tela2[linhas][colunas];
+    //zera a segunda tela
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela2[i][j] = tela[i][j];
+        }
+    }
+    //passa os valores da primeira tela pra segunda
+    for(i=linhapecaatual; i<=linhapecaatual+3 && i<linhas; i++){
+        for(j=colunapecaatual; j<=colunapecaatual+3 && j<colunas; j++){
+            tela2[i+1][j] = tela[i][j];
+        }
+    }
+    for(i=linhapecaatual-3; i<=linhapecaatual; i++){
+        for(j=colunapecaatual; j<colunapecaatual+3; j++){
+            tela2[i][j] = 46;
+        }
+    }
+
+    //passa a tela 2 pra tela 1
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela[i][j] = tela2[i][j];
+        }
     }
 
 }
@@ -225,7 +251,7 @@ void descerUm(char **tela, int linhas, int colunas){
 
 int main(){
     FILE *arq = fopen("entrada.txt", "r");
-    int linhas, colunas, tempo, quantpecas, colunapecaatual, movimentospecaatual, tamanhopeca;
+    int linhas, colunas, tempo, quantpecas, colunapecaatual, movimentospecaatual, tamanhopeca, linhapecaatual;
     int i,j,k;
     //char pecaatual[3][3];
     char ** pecaatual, ** tela;
@@ -257,7 +283,7 @@ int main(){
             }
             printf("\n");
         }
-
+        linhapecaatual=0;
 
         //vetmov eh o vetor que aloca os movimentos da peca atual
         vetmov = alocaMov(movimentospecaatual);
@@ -268,14 +294,15 @@ int main(){
         //fazer laco para jogar a quantidade de movimentos
         for(i=0; i<movimentospecaatual; i++){
             jogarPeca(tela, vetmov, pecaatual);
-            descerUm(tela,linhas,colunas);
+            descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca);
+            linhapecaatual++;
             sleep(tempo);
             printarTela(tela,linhas,colunas);
-            printf("\n\n");
         }
         //se acabarem os movimentos e a peca ainda estivern o alto, ela cai
         for(;i<linhas-tamanhopeca;i++){
-            descerUm(tela,linhas,colunas);
+            descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca);
+            linhapecaatual++;
             sleep(tempo);
             printarTela(tela,linhas,colunas);
         }
