@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <string.h>
 
 
 //aloca a peca atual
@@ -89,8 +89,8 @@ void leArquivo(FILE *arq, int *linhas, int *colunas, int *tempo, int *quantpecas
 
 
 
-void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentospecaatual){
-    int i,j;
+void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentospecaatual, int *tamanhopeca){
+    int i,j, tam;
     char cache;
     //FILE *arq;
     //arq = fopen("entrada.txt", "r");
@@ -100,12 +100,15 @@ void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentos
     for(i=0; i<3; i++){
         fscanf(arq, "%c", &cache);
         for(j=0; j<3; j++){
-
             fscanf(arq, "%c", &pecaatual[j][i]);
-            printf("char [%d][%d] da peca pec: %c\n",i,j,pecaatual[j][i]);
+            if(pecaatual[j][i] != 46){
+                    tam=i;
+                    printf("entrou aqui com i=%d\n", i);
+            }
+            printf("char [%d][%d] da peca pec: %d\n",i,j,pecaatual[j][i]);
         }
     }
-
+    *tamanhopeca = tam; printf("OLHA AQUI: tam=%d, tamannhopeca=%d\n", tam, *tamanhopeca);
 
     fscanf(arq, "%d", movimentospecaatual);
     printf("colunas primeira peca pec: %d\n", *colunapecaatual);
@@ -117,7 +120,6 @@ void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentos
         printf("\n");
     }
     printf("quant movimentos da peca pec: %d\n", *movimentospecaatual);
-
 }
 
 
@@ -148,61 +150,174 @@ void setartela(char **tela, int linhas, int colunas){
             tela[i][j] = 46;
         }
     }
-
-    //printa tela
-    printf("TELA SETARTELA:\n");
-    for(i=0; i<linhas; i++){
-        for(j=0; j<colunas; j++){
-            printf("%c", tela[i][j]);
-        }
-        printf("\n");
-    }
 }
 
 
 
 
 void setarpeca(char **tela, int pecaint[3][3], int colunapecaatual){
-    int i,j,k=0;
+    int i=0,j=0,k=0;
+
 
     for(i=0; i<3; i++){
         k=0;
         for(j=colunapecaatual; j<colunapecaatual+3; j++){
             if(pecaint[i][k] != 46){
                 tela[i][j] = pecaint[i][k];
-                k++;
             }
+            k++;
         }
     }
 
-    printf("TELA SETAR PECA:\n");
-    for(i=0; i<10; i++){
-        for(j=0; j<10; j++){
-            printf("%c", tela[i][j]);
-        }
-        printf("\n");
-    }
 }
 
 
 
 
-void jogarPeca(char **tela, char *vetmov, char **pecaatual){
+void jogarPeca(char **tela, char * vetmov, char **pecaatual, int *linhapecaatual, int *colunapecaatual, int movimentotual, int linhas, int colunas){
+    int i,j;
+    int linhaat = *linhapecaatual;  //declarar nao ponteiros para comparacao, senao buga
+    int colunaat = *colunapecaatual; //declarar nao ponteiros para comparacao, senao buga
+    char mov = vetmov; //declarar nao ponteiros para comparacao, senao buga
+    char tela2[linhas][colunas];
 
+    //zera a segunda tela
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela2[i][j] = tela[i][j];
+        }
+    }
+
+    //printf("vetmov jogarpeca: %c\n", * vetmov);
+    printf("mov jogarpeca: %c\n", mov);
+    printf("result vetmov: %d\n", strcmp(mov, "b"));
+    printf("result mov: %d\n", strcmp(mov, "b"));
+    //se o comando for pra baixo
+    /*if(strcmp(mov,"b") ==0){
+        printf("entrou aqui\n");
+        //passa os valores da primeira tela pra segunda
+        for(i=linhaat; i<=linhaat+3 && i<linhas; i++){
+            for(j=colunaat; j<=colunaat+3 && j<colunas; j++){
+                    tela2[i+1][j] = tela[i][j];
+            }
+        }
+        //limpa a linha de antes
+        for(i=linhaat-3; i<=linhaat; i++){
+            for(j=colunaat; j<colunaat+3; j++){
+                tela2[i][j] = 46;
+            }
+        }
+        *linhapecaatual = *linhapecaatual+1;
+    }
+
+    //se o comando for pra esquerda
+    if(strcmp(mov, "e") == 0){
+        //passa os valores da primeira tela pra segunda
+        for(i=linhaat; i<=linhaat+3 && i<linhas; i++){
+            for(j=colunaat; j<=colunaat+3 && j<colunas; j++){
+                    tela2[i][j-1] = tela[i][j];
+            }
+        }
+        //limpa a coluna de antes
+        for(i=linhaat; i<=linhaat-3; i++){
+            for(j=colunaat+3; j<colunaat; j++){
+                tela2[i][j] = 46;
+            }
+        }
+    }
+/*
+    //se o comando for pra direita
+    if(strcmp(vetmov[movimentotual], "d") == 0){
+        //passa os valores da primeira tela pra segunda
+        for(i=linhaat; i<=linhaat+3 && i<linhas; i++){
+            for(j=colunaat; j<=colunaat+3 && j<colunas; j++){
+                    tela2[i][j+1] = tela[i][j];
+            }
+        }
+        //limpa a coluna de antes
+        for(i=linhaat; i<=linhaat+3; i++){
+            for(j=colunaat-3; j<colunaat; j++){
+                tela2[i][j] = 46;
+            }
+        }
+    }
+
+*/
+
+    //passa a tela 2 pra tela 1
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela[i][j] = tela2[i][j];
+        }
+    }
 }
 
 
 
 
 void printarTela(char **tela, int linhas, int colunas){
-
+    //system("clear");
+    int i,j;
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            printf("%c", tela[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n\n");
 }
 
 
 
 
-void descerUm(){
+void descerUm(char **tela, int linhas, int colunas, int linhapecaatual,int colunapecaatual, int tamanhopeca){
+    int i,j;
+    /*char tela2[linhas][colunas];
+    //zera a segunda tela
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela2[i][j] = 46;
+        }
+    }
+    //passa os valores da primeira tela pra segunda
+    for(i=1; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela2[i][j] = tela[i-1][j];
+        }
+    }
 
+    //passa a tela 2 pra tela 1
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela[i][j] = tela2[i][j];
+        }
+    }*/
+    char tela2[linhas][colunas];
+    //zera a segunda tela
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela2[i][j] = tela[i][j];
+        }
+    }
+    //passa os valores da primeira tela pra segunda
+    for(i=linhapecaatual; i<=linhapecaatual+3 && i<linhas; i++){
+        for(j=colunapecaatual; j<=colunapecaatual+3 && j<colunas; j++){
+                tela2[i+1][j] = tela[i][j];
+        }
+    }
+    //limpa a linha de antes
+    for(i=linhapecaatual-3; i<=linhapecaatual; i++){
+        for(j=colunapecaatual; j<colunapecaatual+3; j++){
+            tela2[i][j] = 46;
+        }
+    }
+
+    //passa a tela 2 pra tela 1
+    for(i=0; i<linhas; i++){
+        for(j=0; j<colunas; j++){
+            tela[i][j] = tela2[i][j];
+        }
+    }
 }
 
 
@@ -210,66 +325,73 @@ void descerUm(){
 
 int main(){
     FILE *arq = fopen("entrada.txt", "r");
-    int linhas, colunas, tempo, quantpecas, colunapecaatual, movimentospecaatual;
+    int linhas, colunas, tempo, quantpecas, colunapecaatual, movimentospecaatual, tamanhopeca, linhapecaatual;
     int i,j,k;
     //char pecaatual[3][3];
     char ** pecaatual, ** tela;
     char * vetmov;
     leArquivo(arq, &linhas, &colunas, &tempo, &quantpecas);
-    //fazer funcao pra alocar essa matriz
     tela = alocaTela(linhas, colunas);
     pecaatual = AlocaAtual();
+
     setartela(tela, linhas, colunas);
-
-    //fazer laco for para quantidade de pecas
-    lePecas(arq, &colunapecaatual, pecaatual, &movimentospecaatual);
-
-
-    //mudar peca atual pra int em ascii
-    int pecaint[3][3];
-    for(i=0; i<3; i++){
-        for(j=0; j<3; j++){
-            pecaint[i][j] = (int) pecaatual[j][i];
-        }
-    }
-    //printar peca int
-    printf("peca int main:\n");
-    for(i=0; i<3; i++){
-        for(j=0; j<3; j++){
-            printf("%c", pecaint[i][j]);
-        }
-        printf("\n");
-    }
-
-
-    //vetmov eh o vetor que aloca os movimentos da peca atual
-    vetmov = alocaMov(movimentospecaatual);
-    leMovimentos(arq, movimentospecaatual, vetmov);
-    //fazer laco para jogar a quantidade de movimentos
-    setarpeca(tela, pecaint, colunapecaatual);
     printarTela(tela, linhas, colunas);
-    /*for(k=0; k<movimentospecaatual; k++){
-        jogarPeca(tela, vetmov, pecaatual);
-        //printarTela();
-        descerUm();
-    }*/
-    //debug
-    for(i=0; i<movimentospecaatual; i++){
-        printf("vetmov[%d] main = %c\n",i,vetmov[i]);
-    }
-    //fechar laco for dos movimentos
-    printf(""); //SEM ISSO AQUI BUGA NAO SEI PQ MAS NAO TIRA
-    liberaMov(vetmov);
-    //fechar laco for das pecas
+    //fazer laco for para quantidade de pecas
+    for(k=0; k<quantpecas; k++){
 
-    printf("peca atual main:\n");
-    for(i=0; i<3; i++){
-        for(j=0; j<3; j++){
-            printf("%c", pecaatual[j][i]);
+        lePecas(arq, &colunapecaatual, pecaatual, &movimentospecaatual, &tamanhopeca);
+        printf("tamanho da peca main: %d\n", tamanhopeca);
+        printf("col: %d\nmovs: %d, tam:%d", colunapecaatual, movimentospecaatual, tamanhopeca);
+        //mudar peca atual pra int em ascii
+        int pecaint[3][3];
+        for(i=0; i<3; i++){
+            for(j=0; j<3; j++){
+                pecaint[i][j] = (int) pecaatual[j][i];
+            }
         }
-        printf("\n");
-    }
+        //printar peca int
+        printf("peca int main:\n");
+        for(i=0; i<3; i++){
+            for(j=0; j<3; j++){
+                printf("%c", pecaint[i][j]);
+            }
+            printf("\n");
+        }
+        linhapecaatual=0;
 
+        //vetmov eh o vetor que aloca os movimentos da peca atual
+        vetmov = alocaMov(movimentospecaatual);
+        leMovimentos(arq, movimentospecaatual, vetmov);
+        setarpeca(tela, pecaint, colunapecaatual);
+        printarTela(tela, linhas, colunas);
+        printf("\n\n");
+        //fazer laco para jogar a quantidade de movimentos
+        for(i=0; i<movimentospecaatual; i++){
+            printf("ta passando o i[%d], vetmov[%c]\n", i, vetmov[i]);
+            jogarPeca(tela, vetmov[i], pecaatual, &linhapecaatual, &colunapecaatual, i, linhas, colunas);
+            sleep(tempo);
+            printarTela(tela,linhas,colunas);
+            if(i<linhas-tamanhopeca-1){
+                descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca);
+                linhapecaatual++;
+                sleep(tempo);
+                printarTela(tela,linhas,colunas);
+            }
+        }
+        //se acabarem os movimentos e a peca ainda estivern o alto, ela cai
+        for(i=linhapecaatual;i<linhas-tamanhopeca-1;i++){
+            descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca);
+            linhapecaatual++;
+            sleep(tempo);
+            printarTela(tela,linhas,colunas);
+        }
+
+        //fechar laco for dos movimentos
+        printf(""); //SEM ISSO AQUI BUGA NAO SEI PQ MAS NAO TIRA
+        liberaMov(vetmov);
+        //fechar laco for das pecas
+
+    }
     liberaAtual(pecaatual);
     liberaTela(tela);
     fclose(arq);
