@@ -221,8 +221,8 @@ void limpalinha(char **tela, int linhas, int colunas){
 
 
 
-void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, int *colunapecaatual, int movimentotual, int linhas, int colunas, int tamanhopeca, int tamanhopeca2){
-    int i,j;
+void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, int *colunapecaatual, int movimentotual, int linhas, int colunas, int tamanhopeca, int tamanhopeca2, int *check){
+    int i,j, check2=0;
     int linhaat = *linhapecaatual;  //declarar nao ponteiros para comparacao, senao buga
     int colunaat = *colunapecaatual; //declarar nao ponteiros para comparacao, senao buga
     char mov = vetmov; //declarar nao ponteiros para comparacao, senao buga
@@ -238,70 +238,116 @@ void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, 
     //printf("vetmov jogarpeca: %c\n", * vetmov);
     printf("mov jogarpeca: %c\n", mov);
     printf("era pra entrar aqui embaixo\n");
+
     //se o comando for pra baixo (b)
     if(mov == 98){
-        //passa os valores da primeira tela pra segunda
-        for(i=linhaat; i<=linhaat+tamanhopeca && i<linhas; i++){
-            for(j=colunaat; j<=colunaat+tamanhopeca2 && j<colunas; j++){
-                    tela2[i+1][j] = tela[i][j];
-            }
+        printf("DESCENDOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
+        //checa se vai colidir em baixo
+        i=linhaat+tamanhopeca+1;
+        printf("tamanho da peca2: %d\n, i: %d\n, coluna da peca: %d\n", tamanhopeca2, i, colunaat);
+        for(j=colunaat; j<=colunaat+tamanhopeca2 && j<colunas; j++){
+            if(tela2[i][j]!=46)
+                check2=1;
         }
-        //limpa a linha de antes
-        for(i=linhaat-tamanhopeca; i<=linhaat; i++){
-            for(j=colunaat; j<colunaat+tamanhopeca2+1; j++){
-                if(tela2[i][j] != 46)
-                    tela2[i][j] = 46;
+
+        if(check2==0){
+            //passa os valores da primeira tela pra segunda
+            for(i=linhaat; i<=linhaat+tamanhopeca && i<linhas; i++){
+                for(j=colunaat; j<=colunaat+tamanhopeca2 && j<colunas; j++){
+                        tela2[i+1][j] = tela[i][j];
+                }
             }
+            //limpa a linha de antes
+            for(i=linhaat-tamanhopeca; i<=linhaat; i++){
+                for(j=colunaat; j<colunaat+tamanhopeca2+1; j++){
+                    if(tela2[i][j] != 46)
+                        tela2[i][j] = 46;
+                }
+            }
+            *linhapecaatual = *linhapecaatual+1;
         }
-        *linhapecaatual = *linhapecaatual+1;
+
     }
 
 
     //se o comando for pra esquerda(e)
     if(mov == 101){
-        //passa os valores da primeira tela pra segunda
-        for(i=linhaat; i<=linhaat+2 && i<linhas; i++){
-            for(j=colunaat; j<=colunaat+3 && j<colunas && j>=0; j++){
-                    tela2[i][j-1] = tela[i][j];
-            }
+        printf("ESQUERDAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+        //checa se vai colidir na esquerda
+        //se colidir o ID de colisao vai ser 2, indicando que nao eh pra baixo
+        j=colunaat-1;
+        for(i=linhaat; i<=linhaat+tamanhopeca && i<linhas; i++){
+            if(tela2[i][j]!=46)
+                check2=2;
         }
-        //limpa a coluna de antes(depois no caso)
-        for(i=linhaat; i<=linhaat+3; i++){
-            for(j=colunaat+3; j<colunaat; j++){
-                tela2[i][j] = 46;
+        if(j<0)
+            check2=2;
+        printf("VE SE COLIDIU AQUI OH CHECK2: %d\nJOTA: %d\nCOLUNA ATUAL: %d\n TAMANHO DA PECA DE LADO: %d\n", check2, j, colunaat, tamanhopeca2);
+        if(check2==0){
+
+            //passa os valores da primeira tela pra segunda
+            for(i=linhaat; i<=linhaat+2 && i<linhas; i++){
+                for(j=colunaat; j<=colunaat+3 && j<colunas && j>=0; j++){
+                        tela2[i][j-1] = tela[i][j];
+                }
             }
+            //limpa a coluna de antes(depois no caso)
+            for(i=linhaat; i<=linhaat+3; i++){
+                for(j=colunaat+3; j<colunaat; j++){
+                    tela2[i][j] = 46;
+                }
+            }
+            *colunapecaatual = *colunapecaatual-1;
         }
-        *colunapecaatual = *colunapecaatual-1;
+
     }
 
 
     //se o comando for pra direita(d)
     if(mov == 100){
-        //passa os valores da primeira tela pra segunda
-        for(i=linhaat; i<=linhaat+2 && i<linhas; i++){
-            for(j=colunaat; j<=colunaat+3 && j<colunas; j++){
-                    tela2[i][j+1] = tela[i][j];
-            }
+        printf("DIREITAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+        //checa se vai colidir na direita
+        //se colidir o ID de colisao vai ser 2, indicando que eh pro lado, nao pra baixo
+        j=colunaat+tamanhopeca2+1;
+        for(i=linhaat; i<=linhaat+tamanhopeca && i<linhas; i++){
+            if(tela2[i][j]!=46)
+                check2=2;
         }
-        //limpa a coluna de antes(agora eh antes mesmo)
-        for(i=linhaat; i<=linhaat+3; i++){
-            for(j=colunaat; j<=colunaat; j++){
-                tela2[i][j] = 46;
+        if(j>=linhas)
+            check2=2;
+
+
+        if(check2==0){
+
+            //passa os valores da primeira tela pra segunda
+            for(i=linhaat; i<=linhaat+2 && i<linhas; i++){
+                for(j=colunaat; j<=colunaat+3 && j<colunas; j++){
+                        tela2[i][j+1] = tela[i][j];
+                }
             }
+            //limpa a coluna de antes(agora eh antes mesmo)
+            for(i=linhaat; i<=linhaat+3; i++){
+                for(j=colunaat; j<=colunaat; j++){
+                    tela2[i][j] = 46;
+                }
+            }
+            *colunapecaatual = *colunapecaatual+1;
         }
-        *colunapecaatual = *colunapecaatual+1;
     }
 
 
-
-    //passa a tela 2 pra tela 1
-    for(i=0; i<linhas; i++){
-        for(j=0; j<colunas; j++){
-            tela[i][j] = tela2[i][j];
+    if(check2==0){
+        //passa a tela 2 pra tela 1
+        for(i=0; i<linhas; i++){
+            for(j=0; j<colunas; j++){
+                tela[i][j] = tela2[i][j];
+            }
         }
     }
+
 
     //verificar se alguma linhas esta cheia
+    *check=check2;
     limpalinha(tela, linhas, colunas);
 }
 
@@ -462,12 +508,12 @@ int main(){
             for(i=0; i<movimentospecaatual; i++){
                 check=0;
                 printf("ta passando o i[%d], vetmov[%c]\n", i, vetmov[i]);
-                jogarPeca(tela, vetmov[i], pecaatual, &linhapecaatual, &colunapecaatual, i, linhas, colunas, tamanhopeca, tamanhopeca2);
+                jogarPeca(tela, vetmov[i], pecaatual, &linhapecaatual, &colunapecaatual, i, linhas, colunas, tamanhopeca, tamanhopeca2, &check);
                 sleep(tempo);
                 printarTela(tela,linhas,colunas);
-                if(i<linhas-tamanhopeca-1 && check==0){
+                if(i<linhas-tamanhopeca-1 && check!=1){
                     descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca, tamanhopeca2, &check);
-                    if(check==0){
+                    if(check!=1){
                         linhapecaatual++;
                     }
                     sleep(tempo);
@@ -475,7 +521,7 @@ int main(){
                 }
             }
             //se acabarem os movimentos e a peca ainda estivern o alto, ela cai
-            for(i=linhapecaatual;i<linhas-tamanhopeca-1 && check==0;i++){
+            for(i=linhapecaatual;i<linhas-tamanhopeca-1 && check!=1;i++){
                 descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca, tamanhopeca2, &check);
                 if(check==0){
                     linhapecaatual++;
@@ -496,4 +542,5 @@ int main(){
     }
 
     fclose(arq);
+    fclose(cya);
 }
