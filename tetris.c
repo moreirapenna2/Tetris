@@ -89,7 +89,7 @@ void leArquivo(FILE *arq, int *colunas, int *tempo, int *quantpecas){
 
 
 
-void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentospecaatual, int *tamanhopeca, int *tamanhopeca2){
+void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentospecaatual, int *tamanhopeca, int *tamanhopeca2, int linhadacoluna[]){
     int i,j, tam=0, tam2=0;
     char cache;
     //FILE *arq;
@@ -103,6 +103,7 @@ void lePecas(FILE *arq, int *colunapecaatual, char ** pecaatual, int *movimentos
             fscanf(arq, "%c", &pecaatual[j][i]);
             if(pecaatual[j][i] != 46){
                     tam=i;
+                    linhadacoluna[j] = i;
                     if(tam2 < j)
                         tam2=j;
                     printf("entrou aqui com i=%d e j=%d\n", i, j);
@@ -158,8 +159,15 @@ void setartela(char **tela, int linhas, int colunas){
 
 
 
-void setarpeca(char **tela, int pecaint[3][3], int colunapecaatual){
-    int i=0,j=0,k=0;
+void setarpeca(char **tela, int colunas, int pecaint[3][3], int colunapecaatual, int *gameover){
+    int i=0,j=0,k;
+
+    for(j=colunapecaatual; j<colunapecaatual+2; j++){
+        if(tela[i][j] != 46){
+            printf("game over\n");
+            *gameover = 1;
+        }
+    }
 
 
     for(i=0; i<3; i++){
@@ -221,8 +229,8 @@ void limpalinha(char **tela, int linhas, int colunas){
 
 
 
-void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, int *colunapecaatual, int movimentotual, int linhas, int colunas, int tamanhopeca, int tamanhopeca2, int *check){
-    int i,j, check2=0;
+void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, int *colunapecaatual, int movimentotual, int linhas, int colunas, int tamanhopeca, int tamanhopeca2, int *check, int linhadacoluna[]){
+    int i,j,k, check2=0;
     int linhaat = *linhapecaatual;  //declarar nao ponteiros para comparacao, senao buga
     int colunaat = *colunapecaatual; //declarar nao ponteiros para comparacao, senao buga
     char mov = vetmov; //declarar nao ponteiros para comparacao, senao buga
@@ -241,7 +249,7 @@ void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, 
 
     //se o comando for pra baixo (b)
     if(mov == 98){
-        printf("DESCENDOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
+
         //checa se vai colidir em baixo
         i=linhaat+tamanhopeca+1;
         printf("tamanho da peca2: %d\n, i: %d\n, coluna da peca: %d\n", tamanhopeca2, i, colunaat);
@@ -250,29 +258,31 @@ void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, 
                 check2=1;
         }
 
+
         if(check2==0){
-            //passa os valores da primeira tela pra segunda
-            for(i=linhaat; i<=linhaat+tamanhopeca && i<linhas; i++){
-                for(j=colunaat; j<=colunaat+tamanhopeca2 && j<colunas; j++){
-                        tela2[i+1][j] = tela[i][j];
+            k=0;
+            for(j=colunaat; j<colunaat+tamanhopeca2+1; j++){
+                for(i=linhaat; i<linhaat+linhadacoluna[k]+1; i++){
+                    tela2[i+1][j] = tela[i][j];
                 }
+                k++;
             }
+
             //limpa a linha de antes
-            for(i=linhaat-tamanhopeca; i<=linhaat; i++){
-                for(j=colunaat; j<colunaat+tamanhopeca2+1; j++){
-                    if(tela2[i][j] != 46)
-                        tela2[i][j] = 46;
-                }
+            i=linhaat;
+            for(j=colunaat; j<colunaat+tamanhopeca2+1; j++){
+                tela2[i][j] = 46;
             }
-            *linhapecaatual = *linhapecaatual+1;
-        }
+
+        *linhapecaatual = *linhapecaatual+1;
+    }
 
     }
 
 
     //se o comando for pra esquerda(e)
     if(mov == 101){
-        printf("ESQUERDAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+
         //checa se vai colidir na esquerda
         //se colidir o ID de colisao vai ser 2, indicando que nao eh pra baixo
         j=colunaat-1;
@@ -282,7 +292,7 @@ void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, 
         }
         if(j<0)
             check2=2;
-        printf("VE SE COLIDIU AQUI OH CHECK2: %d\nJOTA: %d\nCOLUNA ATUAL: %d\n TAMANHO DA PECA DE LADO: %d\n", check2, j, colunaat, tamanhopeca2);
+        //printf("VE SE COLIDIU AQUI OH CHECK2: %d\nJOTA: %d\nCOLUNA ATUAL: %d\n TAMANHO DA PECA DE LADO: %d\n", check2, j, colunaat, tamanhopeca2);
         if(check2==0){
 
             //passa os valores da primeira tela pra segunda
@@ -305,7 +315,7 @@ void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, 
 
     //se o comando for pra direita(d)
     if(mov == 100){
-        printf("DIREITAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+
         //checa se vai colidir na direita
         //se colidir o ID de colisao vai ser 2, indicando que eh pro lado, nao pra baixo
         j=colunaat+tamanhopeca2+1;
@@ -355,7 +365,7 @@ void jogarPeca(char **tela, char vetmov, char **pecaatual, int *linhapecaatual, 
 
 
 void printarTela(char **tela, int linhas, int colunas){
-    //system("clear");
+    system("clear");
     int i,j;
     for(i=0; i<linhas; i++){
         for(j=0; j<colunas; j++){
@@ -369,8 +379,8 @@ void printarTela(char **tela, int linhas, int colunas){
 
 
 
-void descerUm(char **tela, int linhas, int colunas, int linhapecaatual,int colunapecaatual, int tamanhopeca, int tamanhopeca2, int *check){
-    int i,j,check2=0;
+void descerUm(char **tela, int linhas, int colunas, int linhapecaatual,int colunapecaatual, int tamanhopeca, int tamanhopeca2, int *check, int linhadacoluna[]){
+    int i,j,k,check2=0;
     /*char tela2[linhas][colunas];
     //zera a segunda tela
     for(i=0; i<linhas; i++){
@@ -400,26 +410,29 @@ void descerUm(char **tela, int linhas, int colunas, int linhapecaatual,int colun
     }
 
     //checa se vai colidir
-    i=linhapecaatual+tamanhopeca+1;
-    printf("tamanho da peca2: %d\n, i: %d\n, coluna da peca: %d\n", tamanhopeca2, i, colunapecaatual);
-    for(j=colunapecaatual; j<=colunapecaatual+tamanhopeca2 && j<colunas; j++){
-        if(tela2[i][j]!=46)
+
+
+    for(j=0; j<=tamanhopeca2; j++){
+        printf("tela2[%d][%d] = %c\n", linhadacoluna[j]+1+linhapecaatual,colunapecaatual+j, tela2[linhadacoluna[j]+1][colunapecaatual+j]);
+        if(tela2[linhadacoluna[j]+1+linhapecaatual][colunapecaatual+j] != 46)
             check2=1;
     }
 
     if(check2==0){
-        //passa os valores da primeira tela pra segunda
-        for(i=linhapecaatual; i<=linhapecaatual+tamanhopeca && i<linhas; i++){
-            for(j=colunapecaatual; j<=colunapecaatual+tamanhopeca2 && j<colunas; j++){
+
+        k=0;
+        for(j=colunapecaatual; j<colunapecaatual+tamanhopeca2+1; j++){
+            for(i=linhapecaatual; i<linhapecaatual+linhadacoluna[k]+1; i++){
                 tela2[i+1][j] = tela[i][j];
             }
+            k++;
         }
+
         //limpa a linha de antes
-        for(i=linhapecaatual-tamanhopeca; i<=linhapecaatual; i++){
-            for(j=colunapecaatual; j<colunapecaatual+tamanhopeca2+1; j++){
-                if(tela2[i][j] != 46)
-                    tela2[i][j] = 46;
-            }
+
+        i=linhapecaatual;
+        for(j=colunapecaatual; j<colunapecaatual+tamanhopeca2+1; j++){
+            tela2[i][j] = 46;
         }
 
         //passa a tela 2 pra tela 1
@@ -458,7 +471,8 @@ int main(){
     int linhas, colunas, tempo, quantpecas, colunapecaatual, movimentospecaatual, tamanhopeca, linhapecaatual, tamanhopeca2;
     //tamanhopeca = linhas da peca
     //tamanhopeca2 = colunas da peca
-    int i,j,k,check=0;
+    int i,j,k,check=0, gameover=0;
+    int linhadacoluna[3]; //linhacompeca[0] segura o valor de qual linha da coluna 0 tem peca
     //char pecaatual[3][3];
     char ** pecaatual, ** tela;
     char * vetmov;
@@ -476,9 +490,15 @@ int main(){
         setartela(tela, linhas, colunas);
         printarTela(tela, linhas, colunas);
         //fazer laco for para quantidade de pecas
-        for(k=0; k<quantpecas; k++){
+        gameover=0;
+        for(k=0; k<quantpecas && gameover==0; k++){
 
-            lePecas(arq, &colunapecaatual, pecaatual, &movimentospecaatual, &tamanhopeca, &tamanhopeca2);
+            lePecas(arq, &colunapecaatual, pecaatual, &movimentospecaatual, &tamanhopeca, &tamanhopeca2, &linhadacoluna);
+            for(i=0; i<3; i++){
+                printf("linha da coluna %d = %d\n", i, linhadacoluna[i]);
+            }
+            printf("\n ESSE  VALOR AQUI %d\n", linhadacoluna[0]);
+
             printf("tamanho da peca main: %d\n", tamanhopeca);
             printf("col: %d\nmovs: %d, taml:%d, tamc:%d", colunapecaatual, movimentospecaatual, tamanhopeca, tamanhopeca2);
             //mudar peca atual pra int em ascii
@@ -501,18 +521,18 @@ int main(){
             //vetmov eh o vetor que aloca os movimentos da peca atual
             vetmov = alocaMov(movimentospecaatual);
             leMovimentos(arq, movimentospecaatual, vetmov);
-            setarpeca(tela, pecaint, colunapecaatual);
+            setarpeca(tela, colunas, pecaint, colunapecaatual, &gameover);
             printarTela(tela, linhas, colunas);
             printf("\n\n");
             //fazer laco para jogar a quantidade de movimentos
-            for(i=0; i<movimentospecaatual; i++){
+            for(i=0; i<movimentospecaatual && gameover==0; i++){
                 check=0;
                 printf("ta passando o i[%d], vetmov[%c]\n", i, vetmov[i]);
-                jogarPeca(tela, vetmov[i], pecaatual, &linhapecaatual, &colunapecaatual, i, linhas, colunas, tamanhopeca, tamanhopeca2, &check);
+                jogarPeca(tela, vetmov[i], pecaatual, &linhapecaatual, &colunapecaatual, i, linhas, colunas, tamanhopeca, tamanhopeca2, &check, linhadacoluna);
                 sleep(tempo);
                 printarTela(tela,linhas,colunas);
                 if(i<linhas-tamanhopeca-1 && check!=1){
-                    descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca, tamanhopeca2, &check);
+                    descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca, tamanhopeca2, &check, linhadacoluna);
                     if(check!=1){
                         linhapecaatual++;
                     }
@@ -521,8 +541,8 @@ int main(){
                 }
             }
             //se acabarem os movimentos e a peca ainda estivern o alto, ela cai
-            for(i=linhapecaatual;i<linhas-tamanhopeca-1 && check!=1;i++){
-                descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca, tamanhopeca2, &check);
+            for(i=linhapecaatual;i<linhas-tamanhopeca-1 && check!=1 && gameover==0;i++){
+                descerUm(tela,linhas,colunas, linhapecaatual, colunapecaatual, tamanhopeca, tamanhopeca2, &check, linhadacoluna);
                 if(check==0){
                     linhapecaatual++;
                 }
